@@ -9,8 +9,9 @@ const generateHTML = (filename, options = {}) => {
     `${__dirname}/../views/email/${filename}.pug`,
     options
   );
-  console.log(html);
-  return html;
+  const inlined = juice(html);
+
+  return inlined;
 };
 
 const transport = nodemailer.createTransport({
@@ -24,14 +25,16 @@ const transport = nodemailer.createTransport({
 
 exports.send = async options => {
   const html = generateHTML(options.filename, options);
+  const text = htmlToText.fromString(html);
 
   const mailOptions = {
     from: `Shawn Tennity <noreply@shawntennity.com>`,
     to: options.user.email,
     subject: options.subject,
     html,
-    text: 'This will also be filled in later'
+    text
   };
+
   const sendMail = promisify(transport.sendMail, transport);
   return sendMail(mailOptions);
 };
